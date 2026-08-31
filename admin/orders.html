@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Orders | Svadhina Admin</title>
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+<link rel="stylesheet" href="css/admin.css" />
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+    <div class="main-header">
+      <h1>Orders</h1>
+      <select class="field" id="statusFilter" style="padding:8px 12px; border-radius:7px; border:1px solid var(--a-border); font-size:0.86rem;">
+        <option value="">All Statuses</option>
+        <option value="new">New</option>
+        <option value="confirmed">Confirmed</option>
+        <option value="shipped">Shipped</option>
+        <option value="delivered">Delivered</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+    </div>
+
+    <div class="panel">
+      <div class="table-wrap" id="ordersTable"><p class="empty-note">Loading…</p></div>
+    </div>
+  </main>
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop" style="display:none;">
+  <div class="modal" id="orderModal"></div>
+</div>
+
+<script src="js/admin-common.js"></script>
+<script>
+  let ORDERS = [];
+  const STATUSES = ["new", "confirmed", "shipped", "delivered", "cancelled"];
+
+  function statusBadge(status) {
+    return `<span class="badge badge-${status}">${status}</span>`;
+  }
+
+  function renderTable() {
+    const filter = document.getElementById("statusFilter").value;
+    const rows = filter ? ORDERS.filter((o) => o.status === filter) : ORDERS;
+    const container = document.getElementById("ordersTable");
+    if (rows.length === 0) {
+      container.innerHTML = `<p class="empty-note">No orders${filter ? " with this status" : ""} yet.</p>`;
+      return;
+    }
+    container.innerHTML = `
+      <table>
+        <thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Status</th><th>Placed</th><th></th></tr></thead>
+        <tbody>
+          ${rows
+            .map(
+              (o) => `
+            <tr>
+              <td><strong>${o.orderNumber}</strong></td>
+              <td>${o.customerName}<br><span style="color:var(--a-text-soft); font-size:0.8rem;">${o.customerPhone}</span></td>
+              <td>${formatINR(o.total)}</td>
+              <td>${statusBadge(o.status)}</td>
+              <td>${formatDate(o.createdAt)}</td>
+              <td><button class="btn btn-outline btn-sm" data-view="${o.id}">View</button></td>
+            </tr>`
+            )
+            .join("")}
+        </tbody>
+      </table>`;
+    container.querySelectorAll("[data-view]").forEach((btn) =>
+      btn.addEventListener("click", () => openOrder(btn.dataset.view))
+    );
+  }
+
+  async function openOrder(id) {
+    const order = await adminGet(`/orders/${id}`);
+    const modal = document.getElementById("orderModal");
+    modal.innerHTML = `
+      <h2>${order.orderNumber}</h2>
+      <p style="color:var(--a-text-soft); font-size:0.85rem; margin-top:-10px;">Placed ${formatDate(order.createdAt)}</p>
+
+      <div class="field">
+        <label>Status</label>
+        <select id="statusSelect">
+          ${STATUSES.map((s) => `<option value="${s}" ${s === order.status ? "selected" : ""}>${s}</option>`).join("")}
+        </select>
+      </div>
+
+      <div class="field-row">
+        <div>
+          <h3 style="font-size:0.9rem; margin-bottom:6px;">Customer</h3>
+          <p style="font-size:0.86rem; color:var(--a-text-soft); margin:0;">
+            ${order.customer.name}<br>
+            ${order.customer.phone}${order.customer.email ? "<br>" + order.customer.email : ""}<br>
+            ${order.customer.address}, ${order.customer.city}, ${order.customer.state} - ${order.customer.pincode}
+          </p>
+        </div>
+        <div>
+          <h3 style="font-size:0.9rem; margin-bottom:6px;">Payment</h3>
+          <p style="font-size:0.86rem; color:var(--a-text-soft); margin:0;">${order.paymentMethod}</p>
+          ${order.notes ? `<h3 style="font-size:0.9rem; margin:10px 0 6px;">Notes</h3><p style="font-size:0.86rem; color:var(--a-text-soft); margin:0;">${order.notes}</p>` : ""}
+        </div>
+      </div>
+
+      <h3 style="font-size:0.9rem; margin-bottom:6px;">Items</h3>
+      <table style="margin-bottom:14px;">
+        <tbody>
+          ${order.items
+            .map(
+              (i) => `<tr><td>${i.name}</td><td>Qty ${i.qty}</td><td style="text-align:right;">${formatINR(i.price * i.qty)}</td></tr>`
+            )
+            .join("")}
+        </tbody>
+      </table>
+      <div style="text-align:right; font-size:0.88rem; color:var(--a-text-soft);">
+        Subtotal: ${formatINR(order.subtotal)}<br>
+        Shipping: ${order.shipping === 0 ? "Free" : formatINR(order.shipping)}<br>
+        <strong style="color:var(--a-maroon); font-size:1rem;">Total: ${formatINR(order.total)}</strong>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" id="closeModalBtn">Close</button>
+        <button type="button" class="btn" id="saveStatusBtn">Update Status</button>
+      </div>
+    `;
+    document.getElementById("closeModalBtn").addEventListener("click", closeModal);
+    document.getElementById("saveStatusBtn").addEventListener("click", async () => {
+      const status = document.getElementById("statusSelect").value;
+      await adminPut(`/orders/${order.id}/status`, { status });
+      closeModal();
+      await loadOrders();
+    });
+    document.getElementById("modalBackdrop").style.display = "flex";
+  }
+
+  function closeModal() {
+    document.getElementById("modalBackdrop").style.display = "none";
+  }
+  document.getElementById("modalBackdrop").addEventListener("click", (e) => {
+    if (e.target.id === "modalBackdrop") closeModal();
+  });
+
+  async function loadOrders() {
+    ORDERS = await adminGet("/orders");
+    renderTable();
+  }
+
+  document.getElementById("statusFilter").addEventListener("change", renderTable);
+
+  (async () => {
+    await initAdminPage("orders");
+    await loadOrders();
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("id")) openOrder(params.get("id"));
+  })();
+</script>
+</body>
+</html>

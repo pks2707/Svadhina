@@ -1,0 +1,178 @@
+// Sample catalog used only to seed an empty database on first run.
+// Edit/add/remove real products afterwards from the Admin Panel — this file
+// is not read again once products already exist in the database.
+
+function details(obj) {
+  return JSON.stringify(obj);
+}
+
+module.exports = [
+  {
+    slug: "banarasi-royal-maroon",
+    name: "Banarasi Silk Saree — Royal Maroon",
+    fabric: "Banarasi Silk",
+    category: "Silk",
+    occasion: "Wedding",
+    price: 6499,
+    compareAtPrice: 7999,
+    image: "/assets/products/banarasi-royal-maroon.svg",
+    description:
+      "A richly woven Banarasi silk saree in deep maroon with intricate gold zari work — a timeless choice for weddings and festive occasions.",
+    detailsJson: details({
+      Fabric: "Pure Banarasi Silk",
+      Blouse: "Unstitched blouse piece included",
+      Length: "6.3 metres",
+      Wash: "Dry clean only",
+    }),
+    stock: 8,
+    trackInventory: 1,
+    featured: 1,
+  },
+  {
+    slug: "kanjivaram-temple-gold",
+    name: "Kanjivaram Silk Saree — Temple Gold",
+    fabric: "Kanjivaram Silk",
+    category: "Silk",
+    occasion: "Wedding",
+    price: 8999,
+    compareAtPrice: null,
+    image: "/assets/products/kanjivaram-temple-gold.svg",
+    description:
+      "Classic South Indian Kanjivaram silk with a temple-inspired gold border, handwoven for a bold, bridal look that lasts for generations.",
+    detailsJson: details({
+      Fabric: "Pure Kanjivaram Silk",
+      Blouse: "Contrast blouse piece included",
+      Length: "6.3 metres",
+      Wash: "Dry clean only",
+    }),
+    stock: 5,
+    trackInventory: 1,
+    featured: 1,
+  },
+  {
+    slug: "cotton-handloom-ivory",
+    name: "Cotton Handloom Saree — Everyday Ivory",
+    fabric: "Cotton Handloom",
+    category: "Cotton",
+    occasion: "Daily Wear",
+    price: 1899,
+    compareAtPrice: 2399,
+    image: "/assets/products/cotton-handloom-ivory.svg",
+    description:
+      "Breathable handloom cotton in soft ivory with a delicate woven border — light, comfortable, and easy to style for everyday wear.",
+    detailsJson: details({
+      Fabric: "Pure Cotton Handloom",
+      Blouse: "Running blouse fabric attached",
+      Length: "6 metres",
+      Wash: "Hand wash separately",
+    }),
+    stock: 20,
+    trackInventory: 1,
+    featured: 1,
+  },
+  {
+    slug: "chiffon-blush-floral",
+    name: "Chiffon Printed Saree — Blush Floral",
+    fabric: "Chiffon",
+    category: "Chiffon",
+    occasion: "Casual",
+    price: 2499,
+    compareAtPrice: null,
+    image: "/assets/products/chiffon-blush-floral.svg",
+    description:
+      "A lightweight floral-printed chiffon saree in soft blush tones — effortless drape for brunches, day events, and casual outings.",
+    detailsJson: details({
+      Fabric: "Georgette Chiffon",
+      Blouse: "Unstitched blouse piece included",
+      Length: "5.5 metres",
+      Wash: "Dry clean recommended",
+    }),
+    stock: 12,
+    trackInventory: 1,
+    featured: 0,
+  },
+  {
+    slug: "georgette-emerald",
+    name: "Georgette Party Wear Saree — Emerald Green",
+    fabric: "Georgette",
+    category: "Georgette",
+    occasion: "Party Wear",
+    price: 3299,
+    compareAtPrice: 3799,
+    image: "/assets/products/georgette-emerald.svg",
+    description:
+      "A flowing emerald green georgette saree with gold sequin detailing — designed to stand out at evening events and celebrations.",
+    detailsJson: details({
+      Fabric: "Georgette",
+      Blouse: "Stitched sequin blouse included",
+      Length: "5.5 metres",
+      Wash: "Dry clean only",
+    }),
+    stock: 6,
+    trackInventory: 1,
+    featured: 1,
+  },
+  {
+    slug: "tussar-sandalwood",
+    name: "Tussar Silk Saree — Sandalwood Beige",
+    fabric: "Tussar Silk",
+    category: "Silk",
+    occasion: "Office / Festive",
+    price: 4199,
+    compareAtPrice: null,
+    image: "/assets/products/tussar-sandalwood.svg",
+    description:
+      "Earthy sandalwood-toned Tussar silk with a fine maroon border, offering understated elegance for office and festive wear alike.",
+    detailsJson: details({
+      Fabric: "Pure Tussar Silk",
+      Blouse: "Unstitched blouse piece included",
+      Length: "6.3 metres",
+      Wash: "Dry clean only",
+    }),
+    stock: 9,
+    trackInventory: 1,
+    featured: 0,
+  },
+  {
+    slug: "linen-coastal-blue",
+    name: "Linen Saree — Coastal Blue",
+    fabric: "Linen",
+    category: "Linen",
+    occasion: "Office / Daily Wear",
+    price: 2999,
+    compareAtPrice: null,
+    image: "/assets/products/linen-coastal-blue.svg",
+    description:
+      "A crisp coastal blue linen saree with a slim gold border — structured, breathable, and well-suited for the workplace.",
+    detailsJson: details({
+      Fabric: "Pure Linen",
+      Blouse: "Running blouse fabric attached",
+      Length: "6 metres",
+      Wash: "Hand wash / dry clean",
+    }),
+    stock: 14,
+    trackInventory: 1,
+    featured: 0,
+  },
+  {
+    slug: "organza-peach-shimmer",
+    name: "Organza Saree — Peach Shimmer",
+    fabric: "Organza",
+    category: "Organza",
+    occasion: "Party Wear",
+    price: 3799,
+    compareAtPrice: 4299,
+    image: "/assets/products/organza-peach-shimmer.svg",
+    description:
+      "A soft, shimmering peach organza saree with a lightweight drape — perfect for cocktail evenings and festive get-togethers.",
+    detailsJson: details({
+      Fabric: "Organza",
+      Blouse: "Unstitched blouse piece included",
+      Length: "5.5 metres",
+      Wash: "Dry clean only",
+    }),
+    stock: 0,
+    trackInventory: 1,
+    featured: 1,
+  },
+];

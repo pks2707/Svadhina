@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" width="600" height="800">
+  <defs>
+    <linearGradient id="bg-organza-peach-shimmer" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e0a05c"/>
+      <stop offset="100%" stop-color="#c97b3d"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="800" fill="url(#bg-organza-peach-shimmer)"/>
+  <!-- decorative border -->
+  <rect x="20" y="20" width="560" height="760" fill="none" stroke="#fff6e6" stroke-width="2" opacity="0.7"/>
+  <rect x="30" y="30" width="540" height="740" fill="none" stroke="#fff6e6" stroke-width="1" opacity="0.5"/>
+  <!-- corner motifs -->
+  <g opacity="0.85" fill="#fff6e6">
+    <circle cx="60" cy="60" r="4"/>
+    <circle cx="540" cy="60" r="4"/>
+    <circle cx="60" cy="740" r="4"/>
+    <circle cx="540" cy="740" r="4"/>
+  </g>
+  <!-- stylised drape shape -->
+  <g opacity="0.9">
+    <path d="M180,140 C 150,300 150,500 220,660 C 260,700 340,700 380,660 C 300,520 300,300 340,150 Z"
+          fill="#fff6e6" opacity="0.18"/>
+    <path d="M230,150 C 210,320 215,480 260,630" stroke="#fff6e6" stroke-width="2" fill="none" opacity="0.6"/>
+    <path d="M300,150 C 290,320 300,480 330,630" stroke="#fff6e6" stroke-width="2" fill="none" opacity="0.6"/>
+  </g>
+  <!-- paisley dots pattern -->
+  <g fill="#fff6e6" opacity="0.35">
+    <circle cx="120" cy="200" r="3"/>
+    <circle cx="150" cy="240" r="3"/>
+    <circle cx="470" cy="220" r="3"/>
+    <circle cx="440" cy="260" r="3"/>
+    <circle cx="140" cy="600" r="3"/>
+    <circle cx="460" cy="600" r="3"/>
+  </g>
+  <text x="300" y="760" font-family="Georgia, 'Times New Roman', serif" font-size="22" fill="#fff6e6"
+        text-anchor="middle" letter-spacing="2">Organza</text>
+  <text x="300" y="785" font-family="Georgia, 'Times New Roman', serif" font-size="13" fill="#fff6e6"
+        text-anchor="middle" opacity="0.75" letter-spacing="3">SAMPLE IMAGE — REPLACE WITH PHOTO</text>
+</svg>

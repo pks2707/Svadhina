@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin Login | Svadhina</title>
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+<link rel="stylesheet" href="css/admin.css" />
+</head>
+<body>
+<div class="login-wrap">
+  <div class="login-card">
+    <h1>Svadhina Admin</h1>
+    <p class="sub">Sign in to manage products, orders, and site settings.</p>
+    <form id="loginForm">
+      <div class="field">
+        <label for="username">Username</label>
+        <input type="text" id="username" autocomplete="username" required />
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" autocomplete="current-password" required />
+      </div>
+      <p id="loginError" class="error-text" style="display:none;"></p>
+      <button type="submit" class="btn" style="width:100%; justify-content:center;" id="loginBtn">Log In</button>
+    </form>
+  </div>
+</div>
+
+<script src="js/admin-common.js"></script>
+<script>
+  document.getElementById("loginForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const errorEl = document.getElementById("loginError");
+    errorEl.style.display = "none";
+    const btn = document.getElementById("loginBtn");
+    btn.disabled = true;
+    btn.textContent = "Signing in…";
+    try {
+      await adminPost("/login", {
+        username: document.getElementById("username").value.trim(),
+        password: document.getElementById("password").value,
+      });
+      window.location.href = "/admin/index.html";
+    } catch (err) {
+      errorEl.textContent = err.message || "Login failed";
+      errorEl.style.display = "block";
+      btn.disabled = false;
+      btn.textContent = "Log In";
+    }
+  });
+</script>
+</body>
+</html>

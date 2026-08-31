@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Settings | Svadhina Admin</title>
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+<link rel="stylesheet" href="css/admin.css" />
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+    <div class="main-header">
+      <h1>Site Settings</h1>
+    </div>
+
+    <form id="settingsForm">
+      <div class="panel">
+        <h2>Branding</h2>
+        <div class="field-row">
+          <div class="field">
+            <label for="brandName">Business Name</label>
+            <input type="text" id="brandName" required />
+          </div>
+          <div class="field">
+            <label for="tagline">Tagline</label>
+            <input type="text" id="tagline" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Logo</label>
+          <img id="logoPreview" class="logo-preview" />
+          <input type="file" id="logoUpload" accept="image/*" />
+          <input type="hidden" id="logoUrl" />
+          <p class="help-text">Shown in the site header, homepage, and About page.</p>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Theme Colors</h2>
+        <div class="field-row">
+          <div class="field">
+            <label for="colorPrimary">Primary (Maroon)</label>
+            <div class="color-field">
+              <input type="color" id="colorPrimaryPicker" />
+              <input type="text" id="colorPrimary" />
+            </div>
+          </div>
+          <div class="field">
+            <label for="colorGold">Accent (Gold)</label>
+            <div class="color-field">
+              <input type="color" id="colorGoldPicker" />
+              <input type="text" id="colorGold" />
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="colorCream">Background (Cream)</label>
+          <div class="color-field">
+            <input type="color" id="colorCreamPicker" />
+            <input type="text" id="colorCream" />
+          </div>
+        </div>
+        <p class="help-text">Changes apply across the whole storefront instantly after saving — no code changes needed.</p>
+      </div>
+
+      <div class="panel">
+        <h2>About Us Page</h2>
+        <div class="field">
+          <label for="aboutText">About Text</label>
+          <textarea id="aboutText" rows="6"></textarea>
+          <p class="help-text">Separate paragraphs with a blank line.</p>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Contact Details</h2>
+        <div class="field-row">
+          <div class="field">
+            <label for="phonePrimary">Primary Phone</label>
+            <input type="text" id="phonePrimary" />
+          </div>
+          <div class="field">
+            <label for="phoneSecondary">Secondary Phone (optional)</label>
+            <input type="text" id="phoneSecondary" />
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="whatsapp">WhatsApp Number</label>
+            <input type="text" id="whatsapp" placeholder="91XXXXXXXXXX" />
+          </div>
+          <div class="field">
+            <label for="email">Email</label>
+            <input type="email" id="email" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="address">Address</label>
+          <textarea id="address" rows="2"></textarea>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Shipping &amp; Returns</h2>
+        <div class="field-row">
+          <div class="field">
+            <label for="shippingFlatRate">Flat Shipping Fee (₹)</label>
+            <input type="number" id="shippingFlatRate" min="0" />
+          </div>
+          <div class="field">
+            <label for="shippingFreeAbove">Free Shipping Above (₹)</label>
+            <input type="number" id="shippingFreeAbove" min="0" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="shippingNote">Shipping Note</label>
+          <input type="text" id="shippingNote" />
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="returnWindowDays">Return Window (days)</label>
+            <input type="number" id="returnWindowDays" min="0" />
+          </div>
+          <div class="field">
+            <label for="returnCondition">Return Condition</label>
+            <input type="text" id="returnCondition" />
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Business / GST</h2>
+        <div class="field-check"><input type="checkbox" id="gstRegistered" /> <label for="gstRegistered" style="margin:0;">GST Registered</label></div>
+        <div class="field">
+          <label for="gstNumber">GST Number</label>
+          <input type="text" id="gstNumber" />
+        </div>
+      </div>
+
+      <p id="settingsError" class="error-text" style="display:none;"></p>
+      <p id="settingsSuccess" class="success-text" style="display:none;">Settings saved — your storefront is updated.</p>
+      <button type="submit" class="btn" id="saveSettingsBtn">Save Settings</button>
+    </form>
+
+    <div class="panel" style="margin-top:26px;">
+      <h2>Change Admin Password</h2>
+      <form id="passwordForm">
+        <div class="field-row">
+          <div class="field">
+            <label for="currentPassword">Current Password</label>
+            <input type="password" id="currentPassword" required />
+          </div>
+          <div class="field">
+            <label for="newPassword">New Password</label>
+            <input type="password" id="newPassword" required minlength="6" />
+          </div>
+        </div>
+        <p id="pwError" class="error-text" style="display:none;"></p>
+        <p id="pwSuccess" class="success-text" style="display:none;">Password updated.</p>
+        <button type="submit" class="btn btn-outline">Update Password</button>
+      </form>
+    </div>
+  </main>
+</div>
+
+<script src="js/admin-common.js"></script>
+<script>
+  function syncColorInputs(pickerId, textId) {
+    const picker = document.getElementById(pickerId);
+    const text = document.getElementById(textId);
+    picker.addEventListener("input", () => (text.value = picker.value));
+    text.addEventListener("input", () => {
+      if (/^#[0-9a-fA-F]{6}$/.test(text.value)) picker.value = text.value;
+    });
+  }
+  syncColorInputs("colorPrimaryPicker", "colorPrimary");
+  syncColorInputs("colorGoldPicker", "colorGold");
+  syncColorInputs("colorCreamPicker", "colorCream");
+
+  async function loadSettings() {
+    const s = await adminGet("/settings");
+    document.getElementById("brandName").value = s.brandName || "";
+    document.getElementById("tagline").value = s.tagline || "";
+    document.getElementById("logoUrl").value = s.logoUrl || "";
+    document.getElementById("logoPreview").src = s.logoUrl || "";
+    document.getElementById("colorPrimary").value = s.colorPrimary || "#5a0f24";
+    document.getElementById("colorPrimaryPicker").value = s.colorPrimary || "#5a0f24";
+    document.getElementById("colorGold").value = s.colorGold || "#bf9b30";
+    document.getElementById("colorGoldPicker").value = s.colorGold || "#bf9b30";
+    document.getElementById("colorCream").value = s.colorCream || "#fdf0e1";
+    document.getElementById("colorCreamPicker").value = s.colorCream || "#fdf0e1";
+    document.getElementById("aboutText").value = s.aboutText || "";
+    document.getElementById("phonePrimary").value = s.phonePrimary || "";
+    document.getElementById("phoneSecondary").value = s.phoneSecondary || "";
+    document.getElementById("whatsapp").value = s.whatsapp || "";
+    document.getElementById("email").value = s.email || "";
+    document.getElementById("address").value = s.address || "";
+    document.getElementById("shippingFlatRate").value = s.shippingFlatRate ?? 0;
+    document.getElementById("shippingFreeAbove").value = s.shippingFreeAbove ?? 0;
+    document.getElementById("shippingNote").value = s.shippingNote || "";
+    document.getElementById("returnWindowDays").value = s.returnWindowDays ?? 7;
+    document.getElementById("returnCondition").value = s.returnCondition || "";
+    document.getElementById("gstRegistered").checked = !!s.gstRegistered;
+    document.getElementById("gstNumber").value = s.gstNumber || "";
+  }
+
+  document.getElementById("logoUpload").addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append("image", file);
+    try {
+      const res = await fetch("/api/admin/upload?type=branding", { method: "POST", body: formData });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      document.getElementById("logoUrl").value = data.url;
+      document.getElementById("logoPreview").src = data.url;
+    } catch (err) {
+      alert("Logo upload failed: " + err.message);
+    }
+  });
+
+  document.getElementById("settingsForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const errorEl = document.getElementById("settingsError");
+    const successEl = document.getElementById("settingsSuccess");
+    errorEl.style.display = "none";
+    successEl.style.display = "none";
+
+    const payload = {
+      brandName: document.getElementById("brandName").value.trim(),
+      tagline: document.getElementById("tagline").value.trim(),
+      logoUrl: document.getElementById("logoUrl").value,
+      colorPrimary: document.getElementById("colorPrimary").value,
+      colorGold: document.getElementById("colorGold").value,
+      colorCream: document.getElementById("colorCream").value,
+      aboutText: document.getElementById("aboutText").value,
+      phonePrimary: document.getElementById("phonePrimary").value.trim(),
+      phoneSecondary: document.getElementById("phoneSecondary").value.trim(),
+      whatsapp: document.getElementById("whatsapp").value.trim(),
+      email: document.getElementById("email").value.trim(),
+      address: document.getElementById("address").value.trim(),
+      shippingFlatRate: Number(document.getElementById("shippingFlatRate").value) || 0,
+      shippingFreeAbove: Number(document.getElementById("shippingFreeAbove").value) || 0,
+      shippingNote: document.getElementById("shippingNote").value.trim(),
+      returnWindowDays: Number(document.getElementById("returnWindowDays").value) || 0,
+      returnCondition: document.getElementById("returnCondition").value.trim(),
+      gstRegistered: document.getElementById("gstRegistered").checked,
+      gstNumber: document.getElementById("gstNumber").value.trim(),
+    };
+
+    const btn = document.getElementById("saveSettingsBtn");
+    btn.disabled = true;
+    btn.textContent = "Saving…";
+    try {
+      await adminPut("/settings", payload);
+      successEl.style.display = "block";
+    } catch (err) {
+      errorEl.textContent = err.message;
+      errorEl.style.display = "block";
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Save Settings";
+    }
+  });
+
+  document.getElementById("passwordForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const errorEl = document.getElementById("pwError");
+    const successEl = document.getElementById("pwSuccess");
+    errorEl.style.display = "none";
+    successEl.style.display = "none";
+    try {
+      await adminPost("/change-password", {
+        currentPassword: document.getElementById("currentPassword").value,
+        newPassword: document.getElementById("newPassword").value,
+      });
+      successEl.style.display = "block";
+      document.getElementById("passwordForm").reset();
+    } catch (err) {
+      errorEl.textContent = err.message;
+      errorEl.style.display = "block";
+    }
+  });
+
+  (async () => {
+    await initAdminPage("settings");
+    await loadSettings();
+  })();
+</script>
+</body>
+</html>

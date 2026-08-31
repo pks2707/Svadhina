@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Messages | Svadhina Admin</title>
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+<link rel="stylesheet" href="css/admin.css" />
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+    <div class="main-header">
+      <h1>Contact Messages</h1>
+    </div>
+    <div class="panel">
+      <div id="messagesList"><p class="empty-note">Loading…</p></div>
+    </div>
+  </main>
+</div>
+
+<script src="js/admin-common.js"></script>
+<script>
+  let MESSAGES = [];
+
+  function renderList() {
+    const container = document.getElementById("messagesList");
+    if (MESSAGES.length === 0) {
+      container.innerHTML = `<p class="empty-note">No messages yet.</p>`;
+      return;
+    }
+    container.innerHTML = MESSAGES.map(
+      (m) => `
+      <div style="border-bottom:1px solid var(--a-border); padding:16px 0; display:flex; justify-content:space-between; gap:16px; align-items:flex-start;">
+        <div>
+          <strong>${m.name}</strong>
+          <span style="color:var(--a-text-soft); font-size:0.82rem;"> · ${m.contactInfo} · ${formatDate(m.createdAt)}</span>
+          <p style="margin:6px 0 0; font-size:0.9rem;">${m.message}</p>
+        </div>
+        <div style="text-align:right; flex-shrink:0;">
+          ${m.resolved ? `<span class="badge badge-instock">Resolved</span>` : `<span class="badge badge-lowstock">New</span>`}
+          <br>
+          <button class="btn btn-outline btn-sm" style="margin-top:8px;" data-toggle="${m.id}" data-resolved="${m.resolved ? 0 : 1}">
+            Mark as ${m.resolved ? "Unresolved" : "Resolved"}
+          </button>
+        </div>
+      </div>`
+    ).join("");
+
+    container.querySelectorAll("[data-toggle]").forEach((btn) =>
+      btn.addEventListener("click", async () => {
+        await adminPut(`/messages/${btn.dataset.toggle}`, { resolved: btn.dataset.resolved === "1" });
+        await loadMessages();
+      })
+    );
+  }
+
+  async function loadMessages() {
+    MESSAGES = await adminGet("/messages");
+    renderList();
+  }
+
+  (async () => {
+    await initAdminPage("messages");
+    await loadMessages();
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Products | Svadhina Admin</title>
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+<link rel="stylesheet" href="css/admin.css" />
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+    <div class="main-header">
+      <h1>Products</h1>
+      <button class="btn" id="newProductBtn">+ Add Product</button>
+    </div>
+
+    <div class="panel">
+      <div class="table-wrap" id="productsTable"><p class="empty-note">Loading…</p></div>
+    </div>
+  </main>
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop" style="display:none;">
+  <div class="modal">
+    <h2 id="modalTitle">Add Product</h2>
+    <p id="formError" class="error-text" style="display:none;"></p>
+    <form id="productForm">
+      <input type="hidden" id="productId" />
+      <div class="field">
+        <label for="name">Name</label>
+        <input type="text" id="name" required />
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="fabric">Fabric</label>
+          <input type="text" id="fabric" placeholder="e.g. Banarasi Silk" />
+        </div>
+        <div class="field">
+          <label for="category">Category</label>
+          <input type="text" id="category" placeholder="e.g. Silk" />
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="price">Price (₹)</label>
+          <input type="number" id="price" min="0" required />
+        </div>
+        <div class="field">
+          <label for="compareAtPrice">Compare-at Price (₹, optional)</label>
+          <input type="number" id="compareAtPrice" min="0" />
+        </div>
+      </div>
+      <div class="field">
+        <label for="occasion">Occasion</label>
+        <input type="text" id="occasion" placeholder="e.g. Wedding, Daily Wear" />
+      </div>
+      <div class="field">
+        <label for="description">Description</label>
+        <textarea id="description" rows="3"></textarea>
+      </div>
+      <div class="field">
+        <label for="imageUpload">Product Image</label>
+        <input type="file" id="imageUpload" accept="image/*" />
+        <input type="hidden" id="image" />
+        <img id="imagePreview" class="logo-preview" style="display:none; margin-top:8px;" />
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="stock">Stock Quantity</label>
+          <input type="number" id="stock" min="0" value="0" />
+        </div>
+        <div class="field">
+          <label for="&nbsp;">&nbsp;</label>
+          <div class="field-check"><input type="checkbox" id="trackInventory" checked /> <label for="trackInventory" style="margin:0;">Track inventory</label></div>
+        </div>
+      </div>
+      <div class="field-check"><input type="checkbox" id="featured" /> <label for="featured" style="margin:0;">Show on homepage (Featured)</label></div>
+      <div class="field-check"><input type="checkbox" id="active" checked /> <label for="active" style="margin:0;">Active (visible in shop)</label></div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" id="cancelBtn">Cancel</button>
+        <button type="submit" class="btn" id="saveBtn">Save Product</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="js/admin-common.js"></script>
+<script>
+  let PRODUCTS = [];
+
+  function stockBadge(p) {
+    if (!p.trackInventory) return `<span class="badge badge-instock">Not tracked</span>`;
+    if (p.stock <= 0) return `<span class="badge badge-outstock">Out of stock</span>`;
+    if (p.stock <= 3) return `<span class="badge badge-lowstock">${p.stock} left</span>`;
+    return `<span class="badge badge-instock">${p.stock} in stock</span>`;
+  }
+
+  function renderTable() {
+    const container = document.getElementById("productsTable");
+    if (PRODUCTS.length === 0) {
+      container.innerHTML = `<p class="empty-note">No products yet — add your first saree.</p>`;
+      return;
+    }
+    container.innerHTML = `
+      <table>
+        <thead><tr><th></th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          ${PRODUCTS.map(
+            (p) => `
+            <tr>
+              <td><img class="thumb" src="${p.image}" alt="" /></td>
+              <td><strong>${p.name}</strong><br><span style="color:var(--a-text-soft); font-size:0.8rem;">${p.fabric || ""}</span></td>
+              <td>${p.category || "—"}</td>
+              <td>${formatINR(p.price)}${p.compareAtPrice ? `<br><span style="text-decoration:line-through;color:var(--a-text-soft);font-size:0.78rem;">${formatINR(p.compareAtPrice)}</span>` : ""}</td>
+              <td>${stockBadge(p)}</td>
+              <td>
+                ${p.active ? `<span class="badge badge-instock">Active</span>` : `<span class="badge badge-inactive">Hidden</span>`}
+                ${p.featured ? `<br><span class="badge" style="background:#fdf0e1;color:#a97f22;margin-top:4px;">Featured</span>` : ""}
+              </td>
+              <td>
+                <button class="btn btn-outline btn-sm" data-edit="${p.id}">Edit</button>
+                ${p.active ? `<button class="btn btn-danger btn-sm" data-deactivate="${p.id}" style="margin-top:6px;">Hide</button>` : ""}
+              </td>
+            </tr>`
+          ).join("")}
+        </tbody>
+      </table>`;
+
+    container.querySelectorAll("[data-edit]").forEach((btn) =>
+      btn.addEventListener("click", () => openModal(PRODUCTS.find((p) => p.id == btn.dataset.edit)))
+    );
+    container.querySelectorAll("[data-deactivate]").forEach((btn) =>
+      btn.addEventListener("click", async () => {
+        if (!confirm("Hide this product from the shop? You can still see it here and re-activate it later.")) return;
+        await adminDelete(`/products/${btn.dataset.deactivate}`);
+        await loadProducts();
+      })
+    );
+  }
+
+  async function loadProducts() {
+    PRODUCTS = await adminGet("/products");
+    renderTable();
+  }
+
+  function openModal(product) {
+    document.getElementById("formError").style.display = "none";
+    document.getElementById("productForm").reset();
+    document.getElementById("imagePreview").style.display = "none";
+    document.getElementById("modalTitle").textContent = product ? "Edit Product" : "Add Product";
+    document.getElementById("productId").value = product ? product.id : "";
+    document.getElementById("name").value = product ? product.name : "";
+    document.getElementById("fabric").value = product ? product.fabric || "" : "";
+    document.getElementById("category").value = product ? product.category || "" : "";
+    document.getElementById("occasion").value = product ? product.occasion || "" : "";
+    document.getElementById("price").value = product ? product.price : "";
+    document.getElementById("compareAtPrice").value = product && product.compareAtPrice ? product.compareAtPrice : "";
+    document.getElementById("description").value = product ? product.description || "" : "";
+    document.getElementById("image").value = product ? product.image : "";
+    document.getElementById("stock").value = product ? product.stock : 0;
+    document.getElementById("trackInventory").checked = product ? !!product.trackInventory : true;
+    document.getElementById("featured").checked = product ? !!product.featured : false;
+    document.getElementById("active").checked = product ? product.active !== false : true;
+    if (product && product.image) {
+      document.getElementById("imagePreview").src = product.image;
+      document.getElementById("imagePreview").style.display = "block";
+    }
+    document.getElementById("modalBackdrop").style.display = "flex";
+  }
+
+  function closeModal() {
+    document.getElementById("modalBackdrop").style.display = "none";
+  }
+
+  document.getElementById("newProductBtn").addEventListener("click", () => openModal(null));
+  document.getElementById("cancelBtn").addEventListener("click", closeModal);
+  document.getElementById("modalBackdrop").addEventListener("click", (e) => {
+    if (e.target.id === "modalBackdrop") closeModal();
+  });
+
+  document.getElementById("imageUpload").addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append("image", file);
+    try {
+      const res = await fetch("/api/admin/upload?type=product", { method: "POST", body: formData });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      document.getElementById("image").value = data.url;
+      document.getElementById("imagePreview").src = data.url;
+      document.getElementById("imagePreview").style.display = "block";
+    } catch (err) {
+      alert("Image upload failed: " + err.message);
+    }
+  });
+
+  document.getElementById("productForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const errorEl = document.getElementById("formError");
+    errorEl.style.display = "none";
+
+    const id = document.getElementById("productId").value;
+    const payload = {
+      name: document.getElementById("name").value.trim(),
+      fabric: document.getElementById("fabric").value.trim(),
+      category: document.getElementById("category").value.trim(),
+      occasion: document.getElementById("occasion").value.trim(),
+      price: Number(document.getElementById("price").value),
+      compareAtPrice: document.getElementById("compareAtPrice").value ? Number(document.getElementById("compareAtPrice").value) : null,
+      description: document.getElementById("description").value.trim(),
+      image: document.getElementById("image").value || undefined,
+      stock: Number(document.getElementById("stock").value) || 0,
+      trackInventory: document.getElementById("trackInventory").checked,
+      featured: document.getElementById("featured").checked,
+      active: document.getElementById("active").checked,
+    };
+
+    const saveBtn = document.getElementById("saveBtn");
+    saveBtn.disabled = true;
+    saveBtn.textContent = "Saving…";
+    try {
+      if (id) {
+        await adminPut(`/products/${id}`, payload);
+      } else {
+        await adminPost("/products", payload);
+      }
+      closeModal();
+      await loadProducts();
+    } catch (err) {
+      errorEl.textContent = err.message;
+      errorEl.style.display = "block";
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = "Save Product";
+    }
+  });
+
+  (async () => {
+    await initAdminPage("products");
+    await loadProducts();
+  })();
+</script>
+</body>
+</html>

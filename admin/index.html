@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dashboard | Svadhina Admin</title>
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+<link rel="stylesheet" href="css/admin.css" />
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+    <div class="main-header">
+      <h1>Dashboard</h1>
+      <span class="who" id="whoami"></span>
+    </div>
+
+    <div class="stat-grid" id="statGrid"></div>
+
+    <div class="panel" style="margin-top:22px;">
+      <h2>Recent Orders</h2>
+      <div class="table-wrap" id="recentOrders"><p class="empty-note">Loading…</p></div>
+    </div>
+  </main>
+</div>
+
+<script src="js/admin-common.js"></script>
+<script>
+  function statusBadge(status) {
+    return `<span class="badge badge-${status}">${status}</span>`;
+  }
+
+  (async () => {
+    await initAdminPage("dashboard");
+    try {
+      const summary = await adminGet("/summary");
+      document.getElementById("statGrid").innerHTML = `
+        <div class="stat-card"><div class="num">${summary.totalOrders}</div><div class="label">Total Orders</div></div>
+        <div class="stat-card ${summary.newOrders > 0 ? "warn" : ""}"><div class="num">${summary.newOrders}</div><div class="label">New Orders</div></div>
+        <div class="stat-card"><div class="num">${summary.totalCustomers}</div><div class="label">Customers</div></div>
+        <div class="stat-card ${summary.lowStock > 0 ? "warn" : ""}"><div class="num">${summary.lowStock}</div><div class="label">Low / Out of Stock</div></div>
+        <div class="stat-card ${summary.unresolvedMessages > 0 ? "warn" : ""}"><div class="num">${summary.unresolvedMessages}</div><div class="label">New Messages</div></div>
+      `;
+
+      const orders = (await adminGet("/orders")).slice(0, 8);
+      const container = document.getElementById("recentOrders");
+      if (orders.length === 0) {
+        container.innerHTML = `<p class="empty-note">No orders yet.</p>`;
+      } else {
+        container.innerHTML = `
+          <table>
+            <thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Status</th><th>Placed</th><th></th></tr></thead>
+            <tbody>
+              ${orders
+                .map(
+                  (o) => `
+                <tr>
+                  <td><strong>${o.orderNumber}</strong></td>
+                  <td>${o.customerName}<br><span style="color:var(--a-text-soft); font-size:0.8rem;">${o.customerPhone}</span></td>
+                  <td>${formatINR(o.total)}</td>
+                  <td>${statusBadge(o.status)}</td>
+                  <td>${formatDate(o.createdAt)}</td>
+                  <td><a href="/admin/orders.html?id=${o.id}" class="btn btn-outline btn-sm">View</a></td>
+                </tr>`
+                )
+                .join("")}
+            </tbody>
+          </table>`;
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  })();
+</script>
+</body>
+</html>

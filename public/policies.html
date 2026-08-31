@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Shipping & Returns | Svadhina</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body data-page="policies">
+
+<header class="site-header" id="site-header"></header>
+
+<div class="page-hero">
+  <div class="container">
+    <span class="eyebrow">Good to Know</span>
+    <h1>Shipping &amp; Returns</h1>
+  </div>
+</div>
+
+<section class="section" style="max-width:760px; margin:0 auto;">
+  <div class="container">
+    <div class="policy-block">
+      <h3>🚚 Shipping</h3>
+      <p id="shippingText"></p>
+      <ul>
+        <li id="shippingFlat"></li>
+        <li id="shippingFree"></li>
+        <li>We currently ship across India only.</li>
+      </ul>
+    </div>
+
+    <div class="policy-block">
+      <h3>↩️ Returns &amp; Exchanges</h3>
+      <p id="returnText"></p>
+      <ul>
+        <li>To start a return, message us on WhatsApp with your order details.</li>
+        <li>Once approved, ship the item back to us; refunds/exchanges are processed after inspection.</li>
+      </ul>
+    </div>
+
+    <div class="policy-block">
+      <h3>💳 Payments</h3>
+      <p>
+        We're currently onboarding online payments (UPI/cards/netbanking via Razorpay). Until that's live,
+        orders are confirmed over WhatsApp and payment details are shared directly with you.
+      </p>
+    </div>
+
+    <div class="policy-block">
+      <h3>🧾 Invoicing</h3>
+      <p id="gstText"></p>
+    </div>
+
+    <div class="policy-block">
+      <h3>📦 Order Tracking</h3>
+      <p>Once your order ships, we'll share tracking details on WhatsApp or via email.</p>
+    </div>
+
+    <div class="policy-block">
+      <h3>❓ Still Have Questions?</h3>
+      <p>Reach out any time — <a href="contact.html" style="color:var(--maroon-800); font-weight:600;">contact us here</a>.</p>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer" id="site-footer"></footer>
+
+<script src="js/api.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/main.js"></script>
+<script>
+  (async () => {
+    const settings = await window.SITE_READY;
+    document.getElementById("shippingText").textContent = settings.shippingNote;
+    document.getElementById("shippingFlat").textContent =
+      `Flat shipping fee of ${formatINR(settings.shippingFlatRate)} on orders below ${formatINR(settings.shippingFreeAbove)}.`;
+    document.getElementById("shippingFree").textContent =
+      `Free shipping on orders of ${formatINR(settings.shippingFreeAbove)} or more.`;
+    document.getElementById("returnText").textContent =
+      `We accept returns within ${settings.returnWindowDays} days of delivery. ${settings.returnCondition}`;
+    document.getElementById("gstText").textContent = settings.gstRegistered
+      ? `GSTIN: ${settings.gstNumber}. A GST invoice will be shared with every order.`
+      : "We're a growing small business — GST registration is in progress, so invoices are currently informal (no GST applied).";
+  })();
+</script>
+</body>
+</html>

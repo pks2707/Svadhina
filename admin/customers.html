@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Customers | Svadhina Admin</title>
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+<link rel="stylesheet" href="css/admin.css" />
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+    <div class="main-header">
+      <h1>Customers</h1>
+    </div>
+    <div class="panel">
+      <div class="table-wrap" id="customersTable"><p class="empty-note">Loading…</p></div>
+    </div>
+  </main>
+</div>
+
+<script src="js/admin-common.js"></script>
+<script>
+  (async () => {
+    await initAdminPage("customers");
+    const customers = await adminGet("/customers");
+    const container = document.getElementById("customersTable");
+    if (customers.length === 0) {
+      container.innerHTML = `<p class="empty-note">No customers yet — they're created automatically when someone checks out.</p>`;
+      return;
+    }
+    container.innerHTML = `
+      <table>
+        <thead><tr><th>Name</th><th>Phone</th><th>Location</th><th>Orders</th><th>Total Spent</th><th>First Seen</th></tr></thead>
+        <tbody>
+          ${customers
+            .map(
+              (c) => `
+            <tr>
+              <td><strong>${c.name}</strong>${c.email ? `<br><span style="color:var(--a-text-soft); font-size:0.8rem;">${c.email}</span>` : ""}</td>
+              <td><a href="https://wa.me/91${c.phone}" target="_blank" style="color:var(--a-maroon);">${c.phone}</a></td>
+              <td>${c.city}, ${c.state}</td>
+              <td>${c.orderCount}</td>
+              <td>${formatINR(c.totalSpent)}</td>
+              <td>${formatDate(c.createdAt)}</td>
+            </tr>`
+            )
+            .join("")}
+        </tbody>
+      </table>`;
+  })();
+</script>
+</body>
+</html>

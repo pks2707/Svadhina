@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Checkout | Svadhina</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body data-page="checkout">
+
+<header class="site-header" id="site-header"></header>
+
+<div class="page-hero">
+  <div class="container">
+    <span class="eyebrow">Step 2 of 2</span>
+    <h1>Checkout</h1>
+  </div>
+</div>
+
+<section class="section" style="padding-top:40px;">
+  <div class="container" id="checkoutContainer"><p class="loading-note">Loading your order…</p></div>
+</section>
+
+<footer class="site-footer" id="site-footer"></footer>
+
+<script src="js/api.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/main.js"></script>
+<script>
+  (async () => {
+    const settings = await window.SITE_READY;
+    const lines = await getCartLines();
+    const container = document.getElementById("checkoutContainer");
+
+    if (lines.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="icon">🛍️</div>
+          <h2>Your cart is empty</h2>
+          <p>Add a few sarees to your cart before checking out.</p>
+          <a href="shop.html" class="btn btn-primary" style="margin-top:16px;">Start Shopping</a>
+        </div>`;
+      return;
+    }
+
+    const subtotal = lines.reduce((sum, l) => sum + l.lineTotal, 0);
+    const shipping = getShippingCost(subtotal, settings);
+    const total = subtotal + shipping;
+
+    container.innerHTML = `
+      <div class="cart-layout">
+        <div>
+          <div class="notice-banner" id="topNotice">
+            💳 Online payment (Razorpay/UPI) is being set up. For now, place your order below and
+            we'll confirm it with you on WhatsApp, including the payment link.
+          </div>
+
+          <form id="checkoutForm" novalidate>
+            <h3 style="margin-bottom:16px;">Shipping Details</h3>
+            <div class="form-grid">
+              <div class="field full">
+                <label for="fullName">Full Name</label>
+                <input type="text" id="fullName" required />
+                <span class="error">Please enter your full name.</span>
+              </div>
+              <div class="field">
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" placeholder="10-digit mobile number" required />
+                <span class="error">Please enter a valid 10-digit phone number.</span>
+              </div>
+              <div class="field">
+                <label for="email">Email (optional)</label>
+                <input type="email" id="email" />
+                <span class="error">Please enter a valid email address.</span>
+              </div>
+              <div class="field full">
+                <label for="address">Address</label>
+                <textarea id="address" rows="2" required></textarea>
+                <span class="error">Please enter your delivery address.</span>
+              </div>
+              <div class="field">
+                <label for="city">City</label>
+                <input type="text" id="city" required />
+                <span class="error">Please enter your city.</span>
+              </div>
+              <div class="field">
+                <label for="state">State</label>
+                <input type="text" id="state" required />
+                <span class="error">Please enter your state.</span>
+              </div>
+              <div class="field">
+                <label for="pincode">Pincode</label>
+                <input type="text" id="pincode" placeholder="6-digit PIN code" required />
+                <span class="error">Please enter a valid 6-digit pincode.</span>
+              </div>
+              <div class="field">
+                <label for="notes">Order Notes (optional)</label>
+                <input type="text" id="notes" placeholder="Blouse size, delivery instructions..." />
+              </div>
+            </div>
+
+            <h3 style="margin:28px 0 4px;">Payment Method</h3>
+            <div class="payment-options">
+              <label class="payment-option selected">
+                <input type="radio" name="payment" value="whatsapp" checked />
+                <div>
+                  <div class="po-title">Reserve via WhatsApp</div>
+                  <div class="po-desc">Send your order to us on WhatsApp. We'll confirm availability and share a secure payment link.</div>
+                </div>
+              </label>
+              <label class="payment-option" style="opacity:0.6; cursor:not-allowed;">
+                <input type="radio" name="payment" value="razorpay" disabled />
+                <div>
+                  <div class="po-title">Pay Online — UPI / Cards / Netbanking <span class="badge-soon">Coming Soon</span></div>
+                  <div class="po-desc">Secure checkout via Razorpay. Being set up.</div>
+                </div>
+              </label>
+            </div>
+
+            <p id="submitError" style="color:var(--danger); font-size:0.88rem; margin-bottom:12px; display:none;"></p>
+            <button type="submit" class="btn btn-primary btn-block" id="placeOrderBtn">
+              Place Order — ${formatINR(total)}
+            </button>
+          </form>
+        </div>
+
+        <div class="summary-card">
+          <h3 style="margin-bottom:18px;">Order Summary</h3>
+          ${lines
+            .map(
+              (l) => `
+            <div style="display:flex; gap:12px; margin-bottom:14px; align-items:center;">
+              <img src="${l.product.image}" alt="${l.product.name}" style="width:50px;height:64px;object-fit:cover;border-radius:4px;" />
+              <div style="flex:1; font-size:0.85rem;">
+                <div style="font-weight:600;">${l.product.name}</div>
+                <div style="color:var(--ink-soft);">Qty ${l.qty}</div>
+              </div>
+              <div style="font-size:0.88rem; font-weight:600;">${formatINR(l.lineTotal)}</div>
+            </div>`
+            )
+            .join("")}
+          <div class="summary-row" style="margin-top:14px;"><span>Subtotal</span><span>${formatINR(subtotal)}</span></div>
+          <div class="summary-row"><span>Shipping</span><span>${shipping === 0 ? "Free" : formatINR(shipping)}</span></div>
+          <div class="summary-row total"><span>Total</span><span>${formatINR(total)}</span></div>
+        </div>
+      </div>`;
+
+    document.querySelectorAll('input[name="payment"]').forEach((r) =>
+      r.addEventListener("change", () => {
+        document.querySelectorAll(".payment-option").forEach((el) => el.classList.remove("selected"));
+        if (r.checked) r.closest(".payment-option").classList.add("selected");
+      })
+    );
+
+    function setInvalid(id, invalid) {
+      document.getElementById(id).closest(".field").classList.toggle("invalid", invalid);
+    }
+
+    function validate() {
+      let valid = true;
+      const fullName = document.getElementById("fullName").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const address = document.getElementById("address").value.trim();
+      const city = document.getElementById("city").value.trim();
+      const state = document.getElementById("state").value.trim();
+      const pincode = document.getElementById("pincode").value.trim();
+
+      setInvalid("fullName", !fullName); if (!fullName) valid = false;
+      const phoneOk = phone.replace(/\D/g, "").length >= 10;
+      setInvalid("phone", !phoneOk); if (!phoneOk) valid = false;
+      if (email) {
+        const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        setInvalid("email", !emailOk); if (!emailOk) valid = false;
+      } else {
+        setInvalid("email", false);
+      }
+      setInvalid("address", !address); if (!address) valid = false;
+      setInvalid("city", !city); if (!city) valid = false;
+      setInvalid("state", !state); if (!state) valid = false;
+      const pinOk = /^\d{6}$/.test(pincode);
+      setInvalid("pincode", !pinOk); if (!pinOk) valid = false;
+
+      return valid;
+    }
+
+    document.getElementById("checkoutForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const errorEl = document.getElementById("submitError");
+      errorEl.style.display = "none";
+      if (!validate()) return;
+
+      const payload = {
+        customer: {
+          name: document.getElementById("fullName").value.trim(),
+          phone: document.getElementById("phone").value.trim(),
+          email: document.getElementById("email").value.trim() || undefined,
+          address: document.getElementById("address").value.trim(),
+          city: document.getElementById("city").value.trim(),
+          state: document.getElementById("state").value.trim(),
+          pincode: document.getElementById("pincode").value.trim(),
+        },
+        items: readCart(),
+        notes: document.getElementById("notes").value.trim() || undefined,
+      };
+
+      const submitBtn = document.getElementById("placeOrderBtn");
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Placing order…";
+
+      try {
+        const result = await apiPost("/orders", payload);
+        clearCart();
+        window.open(result.whatsappUrl, "_blank");
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="icon">✅</div>
+            <h2>Order Placed — ${result.orderNumber}</h2>
+            <p>Your order has been recorded and details prepared for WhatsApp. If a new tab didn't open,
+            message us directly at <a href="https://wa.me/${settings.whatsapp}" style="color:var(--maroon-800); font-weight:600;">
+            +${settings.whatsapp}</a> and we'll confirm your order and share payment details.</p>
+            <a href="shop.html" class="btn btn-primary" style="margin-top:16px;">Continue Shopping</a>
+          </div>`;
+      } catch (err) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = `Place Order — ${formatINR(total)}`;
+        errorEl.textContent = err.message || "Something went wrong placing your order. Please try again.";
+        errorEl.style.display = "block";
+        if (err.status === 409) {
+          errorEl.textContent += " Please update your cart and try again.";
+        }
+      }
+    });
+  })();
+</script>
+</body>
+</html>

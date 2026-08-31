@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Shop All Sarees | Svadhina</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body data-page="shop">
+
+<header class="site-header" id="site-header"></header>
+
+<div class="page-hero">
+  <div class="container">
+    <span class="eyebrow">The Collection</span>
+    <h1>Shop All Sarees</h1>
+    <p>Browse our full range of silk, cotton, chiffon and party-wear sarees.</p>
+  </div>
+</div>
+
+<section class="section" style="padding-top:40px;">
+  <div class="container">
+    <div class="filters-bar">
+      <div class="chip-group" id="categoryChips"></div>
+      <select class="sort-select" id="sortSelect">
+        <option value="featured">Sort: Featured</option>
+        <option value="price-asc">Price: Low to High</option>
+        <option value="price-desc">Price: High to Low</option>
+        <option value="name-asc">Name: A to Z</option>
+      </select>
+    </div>
+    <div class="product-grid" id="productGrid"><p class="loading-note">Loading sarees…</p></div>
+    <p id="emptyMsg" style="display:none; text-align:center; color:var(--ink-soft); margin-top:40px;">
+      No sarees found in this category yet.
+    </p>
+  </div>
+</section>
+
+<footer class="site-footer" id="site-footer"></footer>
+
+<script src="js/api.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/main.js"></script>
+<script>
+  const params = new URLSearchParams(window.location.search);
+  let activeCategory = params.get("category") || "All";
+  let ALL_PRODUCTS = [];
+
+  function productCard(p) {
+    const out = !p.inStock;
+    return `
+      <a class="product-card ${out ? "is-out" : ""}" href="product.html?slug=${p.slug}">
+        <div class="product-thumb">
+          ${out ? '<span class="product-tag out-of-stock">Out of Stock</span>' : p.compareAtPrice ? '<span class="product-tag">Sale</span>' : ""}
+          <img src="${p.image}" alt="${p.name}" />
+        </div>
+        <div class="product-body">
+          <div class="product-fabric">${p.fabric}</div>
+          <div class="product-name">${p.name}</div>
+          <div class="product-price">
+            <span class="now">${formatINR(p.price)}</span>
+            ${p.compareAtPrice ? `<span class="was">${formatINR(p.compareAtPrice)}</span>` : ""}
+          </div>
+        </div>
+      </a>`;
+  }
+
+  function renderChips() {
+    const categories = ["All", ...new Set(ALL_PRODUCTS.map((p) => p.category))];
+    document.getElementById("categoryChips").innerHTML = categories
+      .map(
+        (cat) =>
+          `<button class="chip ${cat === activeCategory ? "active" : ""}" data-cat="${cat}">${cat}</button>`
+      )
+      .join("");
+    document.querySelectorAll(".chip").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        activeCategory = btn.dataset.cat;
+        renderChips();
+        renderProducts();
+      });
+    });
+  }
+
+  function renderProducts() {
+    let items =
+      activeCategory === "All" ? [...ALL_PRODUCTS] : ALL_PRODUCTS.filter((p) => p.category === activeCategory);
+
+    const sort = document.getElementById("sortSelect").value;
+    if (sort === "price-asc") items.sort((a, b) => a.price - b.price);
+    if (sort === "price-desc") items.sort((a, b) => b.price - a.price);
+    if (sort === "name-asc") items.sort((a, b) => a.name.localeCompare(b.name));
+    if (sort === "featured") items.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
+
+    document.getElementById("productGrid").innerHTML = items.map(productCard).join("");
+    document.getElementById("emptyMsg").style.display = items.length ? "none" : "block";
+  }
+
+  (async () => {
+    await window.SITE_READY;
+    ALL_PRODUCTS = await fetchAllProducts();
+    document.getElementById("sortSelect").addEventListener("change", renderProducts);
+    renderChips();
+    renderProducts();
+  })();
+</script>
+</body>
+</html>

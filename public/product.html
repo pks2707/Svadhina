@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title id="pageTitle">Product | Svadhina</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body data-page="shop">
+
+<header class="site-header" id="site-header"></header>
+
+<section class="section" id="pdSection" style="display:none;">
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="index.html">Home</a> / <a href="shop.html">Shop</a> / <span id="crumbName"></span>
+    </div>
+    <div class="pd-grid">
+      <div class="pd-gallery">
+        <img id="pdImage" src="" alt="" />
+      </div>
+      <div>
+        <div class="pd-fabric" id="pdFabric"></div>
+        <h1 class="pd-name" id="pdName"></h1>
+        <div class="pd-price" id="pdPrice"></div>
+        <p class="pd-desc" id="pdDesc"></p>
+        <ul class="pd-meta-list" id="pdMeta"></ul>
+        <p id="stockNote" class="low-stock-note" style="display:none;"></p>
+
+        <div class="pd-qty" id="qtyBlock">
+          <span style="font-size:0.85rem; color:var(--ink-soft); font-weight:600;">Quantity</span>
+          <div class="qty-control">
+            <button type="button" id="qtyMinus">−</button>
+            <input type="text" id="qtyValue" value="1" readonly />
+            <button type="button" id="qtyPlus">+</button>
+          </div>
+        </div>
+
+        <div class="pd-actions">
+          <button class="btn btn-primary" id="addToCartBtn">Add to Cart</button>
+          <a class="btn btn-outline" id="buyNowBtn" href="cart.html">Buy Now</a>
+        </div>
+
+        <div class="pd-note">
+          🚚 <span id="shippingNote"></span> · ↩️ <span id="returnNote"></span> ·
+          💬 Questions? <a href="#" id="whatsappAsk" style="color:var(--maroon-800); font-weight:600;">Ask us on WhatsApp</a>
+        </div>
+      </div>
+    </div>
+
+    <section class="section" style="padding-bottom:0;">
+      <h2 class="section-title" style="text-align:left;">You May Also Like</h2>
+      <div class="product-grid" id="relatedGrid" style="margin-top:24px;"></div>
+    </section>
+  </div>
+</section>
+
+<section class="section" id="notFoundSection" style="display:none; text-align:center;">
+  <div class="container">
+    <h2>Saree Not Found</h2>
+    <p>This product may have been removed or the link is incorrect.</p>
+    <a href="shop.html" class="btn btn-primary">Back to Shop</a>
+  </div>
+</section>
+
+<footer class="site-footer" id="site-footer"></footer>
+
+<script src="js/api.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/main.js"></script>
+<script>
+  const slug = new URLSearchParams(window.location.search).get("slug");
+  let qty = 1;
+
+  function relatedCard(p) {
+    return `
+      <a class="product-card" href="product.html?slug=${p.slug}">
+        <div class="product-thumb"><img src="${p.image}" alt="${p.name}" /></div>
+        <div class="product-body">
+          <div class="product-fabric">${p.fabric}</div>
+          <div class="product-name">${p.name}</div>
+          <div class="product-price"><span class="now">${formatINR(p.price)}</span></div>
+        </div>
+      </a>`;
+  }
+
+  (async () => {
+    const settings = await window.SITE_READY;
+    let product;
+    try {
+      product = await fetchProductBySlug(slug);
+    } catch (e) {
+      document.getElementById("notFoundSection").style.display = "block";
+      return;
+    }
+
+    document.getElementById("pdSection").style.display = "block";
+    document.title = product.name + " | Svadhina";
+    document.getElementById("crumbName").textContent = product.name;
+    document.getElementById("pdImage").src = product.image;
+    document.getElementById("pdImage").alt = product.name;
+    document.getElementById("pdFabric").textContent = product.fabric + (product.occasion ? " · " + product.occasion : "");
+    document.getElementById("pdName").textContent = product.name;
+    document.getElementById("pdDesc").textContent = product.description;
+    document.getElementById("pdPrice").innerHTML =
+      formatINR(product.price) +
+      (product.compareAtPrice
+        ? ` <span style="text-decoration:line-through;color:var(--ink-soft);font-size:1rem;">${formatINR(product.compareAtPrice)}</span>`
+        : "");
+
+    document.getElementById("pdMeta").innerHTML = Object.entries(product.details || {})
+      .map(([k, v]) => `<li><span>${k}</span><span>${v}</span></li>`)
+      .join("");
+    document.getElementById("shippingNote").textContent = settings.shippingNote;
+    document.getElementById("returnNote").textContent = `${settings.returnWindowDays}-day returns, tags intact`;
+
+    const addBtn = document.getElementById("addToCartBtn");
+    const buyBtn = document.getElementById("buyNowBtn");
+    const stockNote = document.getElementById("stockNote");
+
+    if (!product.inStock) {
+      addBtn.textContent = "Out of Stock";
+      addBtn.disabled = true;
+      addBtn.classList.add("out-of-stock-btn");
+      buyBtn.style.display = "none";
+      document.getElementById("qtyBlock").style.display = "none";
+      stockNote.textContent = "This saree is currently out of stock — check back soon.";
+      stockNote.style.display = "block";
+    } else if (product.trackInventory && product.stock <= 3) {
+      stockNote.textContent = `Only ${product.stock} left in stock!`;
+      stockNote.style.display = "block";
+    }
+
+    const maxQty = product.trackInventory ? Math.max(1, product.stock) : 10;
+    document.getElementById("qtyMinus").addEventListener("click", () => {
+      qty = Math.max(1, qty - 1);
+      document.getElementById("qtyValue").value = qty;
+    });
+    document.getElementById("qtyPlus").addEventListener("click", () => {
+      qty = Math.min(maxQty, qty + 1);
+      document.getElementById("qtyValue").value = qty;
+    });
+
+    addBtn.addEventListener("click", () => {
+      addToCart(product.slug, qty);
+      showToast(`Added ${qty} × ${product.name} to cart`);
+    });
+    buyBtn.addEventListener("click", () => {
+      addToCart(product.slug, qty);
+    });
+
+    const waMsg = encodeURIComponent(
+      `Hi ${settings.brandName}! I have a question about "${product.name}" (${window.location.href}).`
+    );
+    document.getElementById("whatsappAsk").href = `https://wa.me/${settings.whatsapp}?text=${waMsg}`;
+
+    const allProducts = await fetchAllProducts();
+    const related = allProducts.filter((p) => p.category === product.category && p.slug !== product.slug).slice(0, 4);
+    document.getElementById("relatedGrid").innerHTML = related.map(relatedCard).join("");
+  })();
+</script>
+</body>
+</html>

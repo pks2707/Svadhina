@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Svadhina — Elegance that Empowers | Saree Store</title>
+<meta name="description" content="Svadhina — handpicked Banarasi, Kanjivaram, cotton and party-wear sarees delivered across India." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body data-page="home">
+
+<header class="site-header" id="site-header"></header>
+
+<section class="hero">
+  <div class="container hero-grid">
+    <div>
+      <span class="eyebrow">New Collection</span>
+      <h1>Sarees woven with tradition, styled for today.</h1>
+      <p class="lead">
+        Svadhina brings you handpicked Banarasi, Kanjivaram, cotton and party-wear sarees —
+        curated for weddings, festivals, and everyday elegance. Elegance that empowers.
+      </p>
+      <div class="hero-actions">
+        <a href="shop.html" class="btn btn-primary">Shop the Collection</a>
+        <a href="about.html" class="btn btn-outline">Our Story</a>
+      </div>
+      <div class="hero-badges">
+        <div class="hero-badge"><b>7-day</b>&nbsp;returns</div>
+        <div class="hero-badge"><b>Pan-India</b>&nbsp;shipping</div>
+        <div class="hero-badge"><b>Handpicked</b>&nbsp;weaves</div>
+      </div>
+    </div>
+    <div class="hero-image-wrap">
+      <img id="heroLogo" src="/uploads/branding/logo.jpg" alt="Svadhina — Elegance that Empowers" />
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="eyebrow" style="display:block; text-align:center;">Shop by Category</span>
+    <h2 class="section-title">Find Your Perfect Drape</h2>
+    <p class="section-subtitle">From bridal silks to everyday cottons, explore sarees for every occasion.</p>
+    <div class="category-grid" id="categoryGrid"><p class="loading-note">Loading categories…</p></div>
+  </div>
+</section>
+
+<section class="section" style="background:var(--cream-200);">
+  <div class="container">
+    <span class="eyebrow" style="display:block; text-align:center;">Handpicked For You</span>
+    <h2 class="section-title">Featured Sarees</h2>
+    <p class="section-subtitle">A few of our favourites from the current collection.</p>
+    <div class="product-grid" id="featuredGrid"><p class="loading-note">Loading sarees…</p></div>
+    <div style="text-align:center; margin-top:36px;">
+      <a href="shop.html" class="btn btn-gold">View All Sarees</a>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container value-grid">
+    <div class="info-card">
+      <h3>🧵 Handpicked Weaves</h3>
+      <p>Every saree is chosen for its fabric quality, weave, and finish — no mass-market fillers.</p>
+    </div>
+    <div class="info-card">
+      <h3>🚚 Reliable Delivery</h3>
+      <p>Shipped across India with tracking, so you always know where your order is.</p>
+    </div>
+    <div class="info-card">
+      <h3>↩️ Easy Returns</h3>
+      <p>Not the right fit or shade? Return within 7 days, tags intact, no questions asked.</p>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer" id="site-footer"></footer>
+
+<script src="js/api.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/main.js"></script>
+<script>
+  function productCard(p) {
+    const out = !p.inStock;
+    return `
+      <a class="product-card ${out ? "is-out" : ""}" href="product.html?slug=${p.slug}">
+        <div class="product-thumb">
+          ${out ? '<span class="product-tag out-of-stock">Out of Stock</span>' : p.compareAtPrice ? '<span class="product-tag">Sale</span>' : ""}
+          <img src="${p.image}" alt="${p.name}" />
+        </div>
+        <div class="product-body">
+          <div class="product-fabric">${p.fabric}</div>
+          <div class="product-name">${p.name}</div>
+          <div class="product-price">
+            <span class="now">${formatINR(p.price)}</span>
+            ${p.compareAtPrice ? `<span class="was">${formatINR(p.compareAtPrice)}</span>` : ""}
+          </div>
+        </div>
+      </a>`;
+  }
+
+  (async () => {
+    const settings = await window.SITE_READY;
+    document.getElementById("heroLogo").src = settings.logoUrl;
+
+    const products = await fetchAllProducts();
+
+    const categories = [...new Set(products.map((p) => p.category))];
+    document.getElementById("categoryGrid").innerHTML = categories
+      .map((cat) => {
+        const sample = products.find((p) => p.category === cat);
+        return `
+          <a class="category-card" href="shop.html?category=${encodeURIComponent(cat)}">
+            <img src="${sample.image}" alt="${cat} sarees" />
+            <div class="category-label">${cat}</div>
+          </a>`;
+      })
+      .join("");
+
+    const featured = products.filter((p) => p.featured);
+    document.getElementById("featuredGrid").innerHTML = featured.map(productCard).join("");
+  })();
+</script>
+</body>
+</html>

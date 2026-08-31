@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Your Cart | Svadhina</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body data-page="cart">
+
+<header class="site-header" id="site-header"></header>
+
+<div class="page-hero">
+  <div class="container">
+    <span class="eyebrow">Step 1 of 2</span>
+    <h1>Your Cart</h1>
+  </div>
+</div>
+
+<section class="section" style="padding-top:40px;">
+  <div class="container" id="cartContainer"><p class="loading-note">Loading your cart…</p></div>
+</section>
+
+<footer class="site-footer" id="site-footer"></footer>
+
+<script src="js/api.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/main.js"></script>
+<script>
+  let SETTINGS = null;
+
+  async function renderCart() {
+    const lines = await getCartLines();
+    const container = document.getElementById("cartContainer");
+
+    if (lines.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="icon">🛍️</div>
+          <h2>Your cart is empty</h2>
+          <p>Looks like you haven't added any sarees yet.</p>
+          <a href="shop.html" class="btn btn-primary" style="margin-top:16px;">Start Shopping</a>
+        </div>`;
+      return;
+    }
+
+    const subtotal = lines.reduce((sum, l) => sum + l.lineTotal, 0);
+    const shipping = getShippingCost(subtotal, SETTINGS);
+    const total = subtotal + shipping;
+
+    container.innerHTML = `
+      <div class="cart-layout">
+        <div>
+          <table class="cart-table">
+            <thead>
+              <tr><th>Product</th><th>Price</th><th>Qty</th><th>Total</th><th></th></tr>
+            </thead>
+            <tbody>
+              ${lines
+                .map((l) => {
+                  const maxQty = l.product.trackInventory ? l.product.stock : 99;
+                  return `
+                <tr>
+                  <td>
+                    <div class="cart-item-info">
+                      <img src="${l.product.image}" alt="${l.product.name}" />
+                      <div>
+                        <div class="cart-item-name">${l.product.name}</div>
+                        <div class="cart-item-fabric">${l.product.fabric}</div>
+                        ${l.qty > maxQty ? `<div class="low-stock-note">Only ${maxQty} in stock</div>` : ""}
+                        <a href="#" class="remove-link" data-remove="${l.slug}">Remove</a>
+                      </div>
+                    </div>
+                  </td>
+                  <td>${formatINR(l.product.price)}</td>
+                  <td>
+                    <div class="qty-control">
+                      <button type="button" data-decr="${l.slug}">−</button>
+                      <input type="text" value="${l.qty}" readonly />
+                      <button type="button" data-incr="${l.slug}">+</button>
+                    </div>
+                  </td>
+                  <td>${formatINR(l.lineTotal)}</td>
+                  <td><a href="#" data-remove="${l.slug}" style="color:var(--ink-soft);">✕</a></td>
+                </tr>`;
+                })
+                .join("")}
+            </tbody>
+          </table>
+        </div>
+        <div class="summary-card">
+          <h3 style="margin-bottom:18px;">Order Summary</h3>
+          <div class="summary-row"><span>Subtotal</span><span>${formatINR(subtotal)}</span></div>
+          <div class="summary-row">
+            <span>Shipping</span>
+            <span>${shipping === 0 ? "Free" : formatINR(shipping)}</span>
+          </div>
+          <div class="summary-row total"><span>Total</span><span>${formatINR(total)}</span></div>
+          <a href="checkout.html" class="btn btn-primary btn-block" style="margin-top:18px;">Proceed to Checkout</a>
+          <a href="shop.html" class="btn btn-outline btn-block" style="margin-top:10px;">Continue Shopping</a>
+        </div>
+      </div>`;
+
+    container.querySelectorAll("[data-incr]").forEach((btn) =>
+      btn.addEventListener("click", async () => {
+        const line = lines.find((l) => l.slug === btn.dataset.incr);
+        updateCartQty(btn.dataset.incr, line.qty + 1);
+        await renderCart();
+      })
+    );
+    container.querySelectorAll("[data-decr]").forEach((btn) =>
+      btn.addEventListener("click", async () => {
+        const line = lines.find((l) => l.slug === btn.dataset.decr);
+        updateCartQty(btn.dataset.decr, line.qty - 1);
+        await renderCart();
+      })
+    );
+    container.querySelectorAll("[data-remove]").forEach((btn) =>
+      btn.addEventListener("click", async (e) => {
+        e.preventDefault();
+        removeFromCart(btn.dataset.remove);
+        await renderCart();
+      })
+    );
+  }
+
+  (async () => {
+    SETTINGS = await window.SITE_READY;
+    await renderCart();
+  })();
+</script>
+</body>
+</html>

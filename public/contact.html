@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Contact Us | Svadhina</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body data-page="contact">
+
+<header class="site-header" id="site-header"></header>
+
+<div class="page-hero">
+  <div class="container">
+    <span class="eyebrow">We'd Love to Hear From You</span>
+    <h1>Contact Us</h1>
+    <p>Questions about an order, fabric, or fit? Reach out any time.</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container split">
+    <div>
+      <h2>Get in Touch</h2>
+      <p style="color:var(--ink-soft); margin-bottom:24px;">
+        The fastest way to reach us is WhatsApp — we typically reply within a few hours.
+        Prefer to leave a message instead? Use the form and we'll get back to you.
+      </p>
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        <div class="info-card">
+          <h3>📞 Phone</h3>
+          <p id="contactPhones"></p>
+        </div>
+        <div class="info-card">
+          <h3>💬 WhatsApp</h3>
+          <p><a id="contactWhatsapp" href="#" style="color:var(--maroon-800); font-weight:600;">Chat with us</a></p>
+        </div>
+        <div class="info-card">
+          <h3>✉️ Email</h3>
+          <p id="contactEmail"></p>
+        </div>
+        <div class="info-card">
+          <h3>📍 Address</h3>
+          <p id="contactAddress"></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <h3 style="margin-bottom:16px;">Send Us a Message</h3>
+      <form id="contactForm">
+        <div class="field" style="margin-bottom:14px;">
+          <label for="cName">Name</label>
+          <input type="text" id="cName" required />
+        </div>
+        <div class="field" style="margin-bottom:14px;">
+          <label for="cPhone">Phone or Email</label>
+          <input type="text" id="cPhone" required />
+        </div>
+        <div class="field" style="margin-bottom:18px;">
+          <label for="cMessage">Message</label>
+          <textarea id="cMessage" rows="4" required></textarea>
+        </div>
+        <p id="contactError" style="color:var(--danger); font-size:0.85rem; margin-bottom:12px; display:none;"></p>
+        <p id="contactSuccess" style="color:var(--success); font-size:0.85rem; margin-bottom:12px; display:none;">
+          Thanks — your message has been received. We'll get back to you soon.
+        </p>
+        <button type="submit" class="btn btn-primary btn-block" id="contactSubmitBtn">Send Message</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer" id="site-footer"></footer>
+
+<script src="js/api.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/main.js"></script>
+<script>
+  (async () => {
+    const settings = await window.SITE_READY;
+    document.getElementById("contactPhones").textContent =
+      settings.phonePrimary + (settings.phoneSecondary ? " / " + settings.phoneSecondary : "");
+    document.getElementById("contactEmail").textContent = settings.email;
+    document.getElementById("contactAddress").textContent = settings.address;
+    document.getElementById("contactWhatsapp").href = `https://wa.me/${settings.whatsapp}`;
+
+    document.getElementById("contactForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const errorEl = document.getElementById("contactError");
+      const successEl = document.getElementById("contactSuccess");
+      errorEl.style.display = "none";
+      successEl.style.display = "none";
+
+      const name = document.getElementById("cName").value.trim();
+      const contactInfo = document.getElementById("cPhone").value.trim();
+      const msg = document.getElementById("cMessage").value.trim();
+      if (!name || !contactInfo || !msg) return;
+
+      const btn = document.getElementById("contactSubmitBtn");
+      btn.disabled = true;
+      btn.textContent = "Sending…";
+
+      try {
+        await apiPost("/contact", { name, contactInfo, message: msg });
+        successEl.style.display = "block";
+        document.getElementById("contactForm").reset();
+      } catch (err) {
+        errorEl.textContent = err.message || "Couldn't send your message. Please try WhatsApp instead.";
+        errorEl.style.display = "block";
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Send Message";
+      }
+    });
+  })();
+</script>
+</body>
+</html>
