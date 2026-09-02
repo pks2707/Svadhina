@@ -3,7 +3,9 @@ const fs = require("fs");
 const bcrypt = require("bcryptjs");
 const Database = require("better-sqlite3");
 
-const DATA_DIR = path.join(__dirname, "..", "data");
+const DATA_DIR = process.env.DATA_DIR
+  ? path.resolve(process.env.DATA_DIR)
+  : path.join(__dirname, "..", "data");
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
 const db = new Database(path.join(DATA_DIR, "svadhina.db"));

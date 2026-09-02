@@ -116,7 +116,10 @@ running with a persistent disk:
 
 Whichever you choose: set the environment variables from `.env.example` in the host's dashboard
 (never commit a real `.env` to git), set `NODE_ENV=production`, and make sure `data/` and
-`uploads/` are on persistent storage, not ephemeral disk.
+`uploads/` are on persistent storage, not ephemeral disk. On hosts that give you a single mounted
+disk (Render, Railway), point `DATA_DIR` and `UPLOADS_DIR` at two subfolders of that one disk —
+e.g. `DATA_DIR=/var/data/db` and `UPLOADS_DIR=/var/data/uploads` — so both the database and your
+product photos/logo survive redeploys.
 
 ## Backups
 

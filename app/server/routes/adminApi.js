@@ -323,7 +323,9 @@ router.put("/settings", (req, res) => {
 // ---------------------------------------------------------------------------
 // Uploads (product photos, logo)
 // ---------------------------------------------------------------------------
-const UPLOAD_ROOT = path.join(__dirname, "..", "..", "uploads");
+const UPLOAD_ROOT = process.env.UPLOADS_DIR
+  ? path.resolve(process.env.UPLOADS_DIR)
+  : path.join(__dirname, "..", "..", "uploads");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {

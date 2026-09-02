@@ -12,7 +12,9 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const PUBLIC_DIR = path.join(__dirname, "..", "public");
 const ADMIN_DIR = path.join(__dirname, "..", "admin");
-const UPLOADS_DIR = path.join(__dirname, "..", "uploads");
+const UPLOADS_DIR = process.env.UPLOADS_DIR
+  ? path.resolve(process.env.UPLOADS_DIR)
+  : path.join(__dirname, "..", "uploads");
 
 app.set("trust proxy", 1); // needed if deployed behind a reverse proxy (Render, Railway, nginx) serving HTTPS
 
